@@ -12,7 +12,10 @@ from googleapiclient.discovery import build
 
 logger = logging.getLogger(__name__)
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+SCOPES = [
+    "https://www.googleapis.com/auth/gmail.send",
+    "https://www.googleapis.com/auth/gmail.readonly",
+]
 
 
 def _base_dir() -> str:
@@ -30,7 +33,11 @@ def _get_gmail_service():
 
     creds = None
     if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+        with open(token_path) as _f:
+            _token_data = json.load(_f)
+        granted = set(_token_data.get("scopes", []))
+        if set(SCOPES).issubset(granted):
+            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
