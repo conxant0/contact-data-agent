@@ -135,12 +135,18 @@ def send_email(draft: dict, in_reply_to_gmail_id: str | None = None) -> str | No
         return gmail_message_id
     except Exception as e:
         logger.error("Gmail send failed: %s", e)
+        base = _base_dir()
+        fallback_dir = os.path.join(base, "data", "drafts")
+        os.makedirs(fallback_dir, exist_ok=True)
+        fallback_path = os.path.join(fallback_dir, f"{slug}_{iteration}_fallback.txt")
+        with open(fallback_path, "w") as f:
+            f.write(f"To: {to}\nSubject: {subject}\n\n{body}")
         _save_log(
             {"org": org, "to": to, "subject": subject, "iteration": iteration,
              "sent_at": now, "status": "failed", "error": str(e)},
             slug, iteration,
         )
-        raise
+        return None
 
 
 if __name__ == "__main__":

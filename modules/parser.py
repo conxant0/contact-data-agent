@@ -124,7 +124,11 @@ def _call_groq(reply_text: str, goal: str) -> dict:
             ],
             response_format={"type": "json_object"},
         )
-        return json.loads(response.choices[0].message.content)
+        try:
+            return json.loads(response.choices[0].message.content)
+        except (json.JSONDecodeError, ValueError):
+            logger.warning("Groq returned unparseable content — returning low-confidence fallback")
+            return {"confidence": "low", "collected": []}
 
     try:
         return _call()
@@ -166,6 +170,9 @@ def parse_reply(
         sys.exit(f"Gmail API error fetching reply message {reply_id}: {e}")
 
     reply_text = _extract_body(message)
+    if not reply_text.strip():
+        logger.warning("Reply body is empty — returning low-confidence fallback")
+        return {"confidence": "low", "collected": [], "raw_reply": ""}
     result = _call_groq(reply_text, goal)
     result["raw_reply"] = reply_text
     return result

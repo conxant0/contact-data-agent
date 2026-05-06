@@ -75,8 +75,9 @@ def main():
     eval_result = evaluate(goal, run["collected"], run["iteration"], run["max_iterations"])
     decision = eval_result["decision"]
 
-    if decision == "complete" or run["iteration"] >= run["max_iterations"]:
-        final_status = "complete" if decision == "complete" else "incomplete"
+    reached_max = run["iteration"] >= run["max_iterations"]
+    if decision == "complete" or reached_max:
+        final_status = "incomplete" if reached_max else "complete"
 
         parsed_dir = os.path.join(_base_dir(), "data", "parsed")
         os.makedirs(parsed_dir, exist_ok=True)
