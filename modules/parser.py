@@ -99,8 +99,10 @@ def _build_groq_prompt(reply_text: str, goal: str) -> str:
         reply_text,
         "---",
         "",
-        "If the goal contains 'or' between items, treat them as a single field with alternatives.",
-        "Extract as one field, not two separate fields. Use the first alternative as the field name.",
+        "If the goal uses 'or' between items, treat them as alternatives — extract as ONE field, "
+        "using the first alternative as the field name.",
+        "If the goal uses 'and', 'as well as', or any additive conjunction, extract each item as a "
+        "SEPARATE field — both are required and must appear as distinct entries in 'collected'.",
         "",
         "Extract every field the goal asks for. Return a JSON object with exactly these keys:",
         '- "collected": array of objects, each with "field" (string), "value" (string or null), "found" (boolean)',
