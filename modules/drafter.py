@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -56,7 +57,7 @@ def _build_prompt(
             "",
             'Return a JSON object with exactly these keys:',
             '- "subject": a specific, non-generic subject line',
-            '- "body": the full email body (plain text, no markdown)',
+            '- "body": the full email body (plain text, no markdown, blank line between paragraphs)',
         ]
     else:
         lines = [
@@ -81,7 +82,7 @@ def _build_prompt(
             "",
             'Return a JSON object with exactly these keys:',
             f'- "subject": use exactly this subject line: "Re: {original_subject}"',
-            '- "body": the full email body (plain text, no markdown)',
+            '- "body": the full email body (plain text, no markdown, blank line between paragraphs)',
         ]
 
     return "\n".join(lines)
@@ -152,11 +153,14 @@ def draft_email(
     )
     result = _call_groq(prompt)
 
+    body = result["body"].replace("\r\n", "\n").replace("\r", "\n")
+    body = re.sub(r"\n{3,}", "\n\n", body).strip()
+
     draft = {
         "org": org,
         "to": email,
         "subject": result["subject"],
-        "body": result["body"],
+        "body": body,
         "goal": goal,
         "iteration": iteration,
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),

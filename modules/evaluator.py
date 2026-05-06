@@ -17,6 +17,8 @@ def _build_prompt(goal: str, collected: list) -> str:
         "You are evaluating whether a data-collection goal has been fully satisfied.",
         "",
         f"Goal: {goal}",
+        "If the goal contains 'or' between two items, treat them as alternatives — "
+        "finding either one fully satisfies that part of the goal. Do not require both.",
         "",
         "Collected data so far:",
     ]
@@ -28,7 +30,7 @@ def _build_prompt(goal: str, collected: list) -> str:
         "",
         "Does the collected data fully satisfy the goal?",
         "",
-        'Return a JSON object with exactly these keys:',
+        "Return a JSON object with exactly these keys:",
         '- "decision": "complete" if every field needed by the goal was found, '
         'otherwise "follow_up_needed"',
         '- "gaps": a JSON array of objects with "field" and "reason" keys — '
@@ -94,11 +96,23 @@ if __name__ == "__main__":
     GOAL = "Find the partnerships decision-maker and their direct contact email"
 
     all_found = [
-        {"field": "partnerships decision-maker", "value": "Maria Santos", "found": True},
-        {"field": "direct contact email", "value": "maria@habitat.org.ph", "found": True},
+        {
+            "field": "partnerships decision-maker",
+            "value": "Maria Santos",
+            "found": True,
+        },
+        {
+            "field": "direct contact email",
+            "value": "maria@habitat.org.ph",
+            "found": True,
+        },
     ]
     one_missing = [
-        {"field": "partnerships decision-maker", "value": "Maria Santos", "found": True},
+        {
+            "field": "partnerships decision-maker",
+            "value": "Maria Santos",
+            "found": True,
+        },
         {"field": "direct contact email", "value": None, "found": False},
     ]
 
@@ -123,7 +137,9 @@ if __name__ == "__main__":
     print(f"  gaps:      {r2['gaps']}")
     print(f"  reasoning: {r2['reasoning']}")
     gap_fields = [g["field"] for g in r2.get("gaps", [])]
-    all_pass &= check("decision is 'follow_up_needed'", r2["decision"] == "follow_up_needed")
+    all_pass &= check(
+        "decision is 'follow_up_needed'", r2["decision"] == "follow_up_needed"
+    )
     all_pass &= check("gap identifies missing field", len(r2["gaps"]) >= 1)
     all_pass &= check(
         "gap field is 'direct contact email'",
