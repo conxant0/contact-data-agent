@@ -1,0 +1,20 @@
+{
+  "org": "Habitat for Humanity Philippines",
+  "email": "confox2145@gmail.com",
+  "goal": "Find the partnerships decision-maker and their direct contact email",
+  "status": "complete",
+  "iterations": 2,
+  "collected": [
+    {
+      "field": "partnerships decision-maker",
+      "value": "Dr. Radahn",
+      "found": true
+    },
+    {
+      "field": "direct contact email",
+      "value": "radahn@er.com",
+      "found": true
+    }
+  ],
+  "completed_at": "2026-05-05T14:23:28.263570Z"
+}
